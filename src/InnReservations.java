@@ -20,9 +20,9 @@ public class InnReservations
             System.exit(-1);
         }
 
-        try (Connection conn = DriverManager.getConnection(System.getenv("HP_JDBC_URL"),
-                System.getenv("HP_JDBC_USER"),
-                System.getenv("HP_JDBC_PW")))
+        try (Connection conn = DriverManager.getConnection(System.getenv("lab7_JDBC_URL"),
+                System.getenv("lab7_JDBC_USER"),
+                System.getenv("lab7_JDBC_PW")))
         {
             System.out.println("Connected");
         } catch (Exception e)
