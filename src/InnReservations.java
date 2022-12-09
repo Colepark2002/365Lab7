@@ -41,39 +41,17 @@ public class InnReservations
             }
         }
     }
-    public void tryConnect() throws SQLException
-    {
-        try
-        {
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("MySQL JDBC Driver loaded");
-        } catch (ClassNotFoundException ex)
-        {
-            System.err.println("Unable to load JDBC Driver");
-            System.exit(-1);
-        }
-
-        try (Connection conn = DriverManager.getConnection(System.getenv("lab7_JDBC_URL"),
-                System.getenv("lab7_JDBC_USER"),
-                System.getenv("lab7_JDBC_PW")))
-        {
-            System.out.println("Connected");
-        } catch (Exception e)
-        {
-            System.out.println("Did not Connect");
-        }
-    }
 
     public void roomsAndRates() throws SQLException {
         String query = "SELECT RoomCode, RoomName, Beds, bedType, maxOcc, basePrice, decor,"
                 + " IF(SUM(DATEDIFF(res.Checkout, res.CheckIn)) > 180, 180, SUM(DATEDIFF(res.Checkout, res.CheckIn))) / 180.0 AS RoomPopularityScore,"
-                + " MIN(res.CheckIn) AS NextAvailableCheckIn,"
+                + " greatest(current_date, MAX(res.Checkout)) AS NextAvailableCheckIn,"
                 + " MAX(res.Checkout) AS MostRecentCheckout,"
                 + " DATEDIFF(MAX(res.CheckOut), MAX(res.CheckIn)) as MostRecentCheckoutDays"
                 + " FROM lab7_rooms "
                 + " JOIN lab7_reservations res"
                 + " ON RoomCode = res.Room"
-                + " AND res.Checkout > NOW() - INTERVAL 180 DAY"
+                + " AND res.Checkout > current_date - INTERVAL 180 DAY"
                 + " GROUP BY RoomCode"
                 + " ORDER BY RoomPopularityScore DESC";
 
@@ -120,5 +98,14 @@ public class InnReservations
         int numChild = sc.nextInt();
         System.out.println("Enter Number of Adults: ");
         int numAdult = sc.nextInt();
+
+
+        try (Connection conn = DriverManager.getConnection(System.getenv("lab7_JDBC_URL"), System.getenv("lab7_JDBC_USER"), System.getenv("lab7_JDBC_PW"));
+             Statement stmt = conn.createStatement();)
+        {
+            PreparedStatement prepared = conn.prepareStatement("SELECT * FROM lab7_rooms");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 }
