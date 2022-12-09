@@ -1,11 +1,19 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class InnReservations
 {
     public static void main(String[] args) throws SQLException {
         InnReservations test = new InnReservations();
+        System.out.println("Rooms and Rates: 1");
+        System.out.println("Reservations: 2");
+        System.out.println("Revenue: 3");
+        System.out.print("Type the number to the right of the colon to access the desired option: ");
+        Scanner sc = new Scanner(System.in);
+        int input = sc.nextInt();
+        System.out.println(""+input);
         test.tryConnect();
     }
     public void tryConnect() throws SQLException
