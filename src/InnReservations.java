@@ -45,6 +45,11 @@ public class InnReservations
                     System.out.println("Revenue");
                     break;
 
+                case 4:
+                    System.out.println("Cancel");
+                    test.cancelReservation();
+                    break;
+
                 default:
                     System.out.println("Invalid Input Please try again");
                     break;
@@ -146,10 +151,9 @@ public class InnReservations
                 }
 
                 // Make sure inputted dates are at or later than the current date
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 LocalDate currDate = LocalDate.now();
-                LocalDate checkInDate = LocalDate.parse(checkIn,formatter);
-                LocalDate checkOutDate = LocalDate.parse(checkOut, formatter);
+                LocalDate checkInDate = LocalDate.parse(checkIn);
+                LocalDate checkOutDate = LocalDate.parse(checkOut);
                 int inCheck = currDate.compareTo(checkInDate);
                 int outCheck = currDate.compareTo(checkOutDate);
 
@@ -157,7 +161,7 @@ public class InnReservations
                 if (!rs.next() && (inCheck <= 0 && outCheck <= 0))
                 {
                     try(PreparedStatement prep1 =
-                                conn.prepareStatement("Select RoomName, maxOcc, basePrice, bedType from lab7_rooms where RoomId = ?;"))
+                                conn.prepareStatement("Select RoomName, maxOcc, basePrice, bedType from lab7_rooms where RoomCode = ?;"))
                     {
                         prep1.setString(1,roomcode);
 
@@ -192,14 +196,13 @@ public class InnReservations
                                 prep2.setInt(9, numChild);
 
 
-
+                                Scanner sc2 = new Scanner(System.in);
                                 System.out.println("\nDo you want to make this reservation?: y or n");
-                                String answer = sc.nextLine();
+                                String answer = sc2.nextLine();
 
                                 if(answer.equals("y"))
                                 {
                                     prep2.executeUpdate();
-                                    conn.commit();
                                     System.out.println("\nSuccessfully added the reservation with info: ");
                                     System.out.println("\n");
                                     System.out.println("First Name: " + first);
@@ -252,6 +255,10 @@ public class InnReservations
                         }
                     }
                 }
+                else
+                {
+                    System.out.println("\nInvalid Reservation Day");
+                }
 
             } catch(SQLException e)
             {
@@ -263,15 +270,34 @@ public class InnReservations
         }
     }
 
-    public void cancelReservation(int reservationCode) throws SQLException {
+    public void cancelReservation() throws SQLException {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Please Enter Reservation Code: ");
+        int reservationCode = scanner.nextInt();
         System.out.println("Are you sure you want to cancel reservation " + reservationCode + "? (y/n)");
+        scanner.nextLine();
         String confirmation = scanner.nextLine();
         if (!confirmation.equalsIgnoreCase("y")) {
             return; // Cancel the operation
         }
         try (Connection conn = DriverManager.getConnection(System.getenv("lab7_JDBC_URL"), System.getenv("lab7_JDBC_USER"), System.getenv("lab7_JDBC_PW"));
              Statement stmt = conn.createStatement();) {
+            PreparedStatement prepared = conn.prepareStatement("DELETE FROM lab7_reservations WHERE CODE = ?");
+            prepared.setInt(1, reservationCode);
+            prepared.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void changeReservation() throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please Enter Reservation Code: ");
+        int reservationCode = scanner.nextInt();
+
+        try (Connection conn = DriverManager.getConnection(System.getenv("lab7_JDBC_URL"), System.getenv("lab7_JDBC_USER"), System.getenv("lab7_JDBC_PW"));
+             Statement stmt = conn.createStatement();)
+        {
             PreparedStatement prepared = conn.prepareStatement("DELETE FROM lab7_reservations WHERE CODE = ?");
             prepared.setInt(1, reservationCode);
             prepared.executeUpdate();
